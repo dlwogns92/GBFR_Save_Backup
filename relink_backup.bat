@@ -7,8 +7,10 @@ set "BATCH_PATH=%~f0"
 set "APP_PROCESS_NAME=granblue_fantasy_relink"
 set "BACKUP_PRE_NAME=SaveGames"
 set "BACKUP_TARGET_PATH=%LOCALAPPDATA%\GBFR\Saved\SaveGames\"
-set "BACKUP_DEST_PATH=%BACKUP_TARGET_PATH%"
+rem set "BACKUP_DEST_PATH=%LOCALAPPDATA%\GBFR\Saved\"
+set "BACKUP_DEST_PATH=%LOCALAPPDATA%\GBFR\Saved\"
 set DELETE_DAYS=-1
+set "arg1=%1"
 
 call :CheckAppRunning
 IF "%errorlevel%" equ "0" (
@@ -17,7 +19,7 @@ IF "%errorlevel%" equ "0" (
 	exit /b
 )
 
-IF "%1" == "1" (
+IF "%arg1%" == "force" (
 	call :CreateZip
 	exit /b
 )
@@ -52,7 +54,8 @@ exit /b
 
 :CreateZip
 setlocal
-set curDateTime=%date:~2,2%%date:~5,2%%date:~8,2%%time:~0,2%%time:~3,2%%time:~6,2%
+set curTime=%time: =0%
+set curDateTime=%date:~2,2%%date:~5,2%%date:~8,2%%curTime:~0,2%%curTime:~3,2%%curTime:~6,2%
 echo Zipping...
 powershell -NonInteractive -command "try { Compress-Archive -Path '%BACKUP_TARGET_PATH%' -DestinationPath '%BACKUP_DEST_PATH%%BACKUP_PRE_NAME%_%curDateTime%.zip' } catch { }" 2>NUL >NUL
 call :ShowText Zipping
@@ -65,14 +68,14 @@ exit /b
 
 :DeleteOldFile
 setlocal
-echo "%BACKUP_DEST_PATH%"
 forfiles /p %BACKUP_DEST_PATH% /s /m %BACKUP_PRE_NAME%_*.zip /D %DELETE_DAYS% /c "cmd /c del @path" 2>NUL >NUL
 endlocal
 exit /b
 
 :CreateSchedule
 setlocal
-schtasks /create /tn %SCHEDULE_NAME% /ru "SYSTEM" /tr "cmd.exe /C %BATCH_PATH% 1" /sc minute /mo %SCHEDULER_TIME_MINUTE% 2>NUL >NUL
+rem /ru "SYSTEM"
+schtasks /create /tn %SCHEDULE_NAME% /tr "cmd.exe /C %BATCH_PATH% force" /sc minute /mo %SCHEDULER_TIME_MINUTE% /RL HIGHEST /NP 2>NUL >NUL
 call :ShowText "Create Schedule"
 endlocal
 exit /b
