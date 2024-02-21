@@ -7,7 +7,6 @@ set "BATCH_PATH=%~f0"
 set "APP_PROCESS_NAME=granblue_fantasy_relink"
 set "BACKUP_PRE_NAME=SaveGames"
 set "BACKUP_TARGET_PATH=%LOCALAPPDATA%\GBFR\Saved\SaveGames\"
-rem set "BACKUP_DEST_PATH=%LOCALAPPDATA%\GBFR\Saved\"
 set "BACKUP_DEST_PATH=%LOCALAPPDATA%\GBFR\Saved\"
 set DELETE_DAYS=-1
 set "arg1=%1"
@@ -15,7 +14,9 @@ set "arg1=%1"
 call :CheckAppRunning
 IF "%errorlevel%" equ "0" (
 	echo "Not Running %APP_PROCESS_NAME%"
-	pause
+	IF NOT "%arg1%" == "force" (
+		pause
+	)
 	exit /b
 )
 
